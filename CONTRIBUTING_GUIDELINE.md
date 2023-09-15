@@ -48,7 +48,9 @@ Thank you for helping us maintain a tidy and accessible repository!
 ## **Pull Request Process 🚀**
 1. Ensure that you have self reviewed your code 😀
 2. Make sure you have added the proper description for the functionality of the template
-3. Make sure that you have tested to deploy it, and remove it. 
+3. Make sure that you have tested to deploy it, and remove it.
+4. Fork the repo and add the template or update an existing template.
+5. Create a pull request on the changes that you want to apply. 
 4. If your template contribues to a service that has not previously touched on in this project please include a description in the readme in the PR.  
 5. Submit your PR by giving the necesarry information in PR template and hang tight we will review it really soon 🚀
 
