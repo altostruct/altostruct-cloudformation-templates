@@ -1,9 +1,6 @@
 # AWS CloudFormation Templates Directory
 This directory contains a collection of AWS CloudFormation templates that can be utilized within your project. These templates are designed to simplify the provisioning and management of various AWS services, making it easier to set up, configure, and deploy infrastructure components as code.
 
-# AWS CloudFormation Sample Templates
-Use sample AWS CloudFormation templates to learn how to declare specific AWS resources or solve a particular use case. We recommend that you use sample templates as a starting point for creating your own templates, not for launching production-level environments. Before launching a template, always review the resources that it will create and the permissions it requires.
-
 ## Available CloudFormation Templates
 1. **Aurora Database**: Use the Aurora template to provision Amazon Aurora database clusters, a high-performance relational database service.
 
@@ -30,10 +27,19 @@ Use sample AWS CloudFormation templates to learn how to declare specific AWS res
 To use these CloudFormation templates in your project:
 
 1. Navigate to the specific template directory.
-2. Review the template's README or documentation for usage instructions and any required parameters.
-3. Use the AWS CloudFormation service to deploy the stack based on your project's needs.
+2. Use the AWS CloudFormation service to deploy the stack based on your project's needs.
 
 By utilizing these templates, you can quickly and consistently provision AWS resources, saving time and ensuring infrastructure as code best practices.
+
+## How to contibute
+
+- Read our documentation on how to contribute in our [contibution guidelines](/CONTRIBUTING_GUIDELINE.md)
+
+
+## Code of conduct
+
+- Rules and code of conduct that is used and must be followed can be viewed here: [code of conduct](CODE_OF_CONDUCT.md)
+
 
 ## Additional Resources
 In the *AWS CloudFormation User Guide*, you can view more information about the following topics:

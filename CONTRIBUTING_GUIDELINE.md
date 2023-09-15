@@ -31,9 +31,9 @@ Consistency in file naming is essential for maintaining an organized and accessi
 
 2. **Use Lowercase Letters**: Always use lowercase letters for file names. This ensures cross-platform compatibility and consistency.
 
-3. **Use Hyphens or Underscores**: Use hyphens ("-") or underscores ("_") to separate words in file names. This improves readability. For example:
-   - `serverless-aurora.txt`
-   - `lambda.yml`
+3. **Use Hyphens or Underscores**: Use hyphens ("-") to separate words in file names. This improves readability. For example:
+   - `serverless-aurora.json`
+   - `lambda-sqs-lambda.yml`
 
 4. **Avoid Special Characters**: Avoid using special characters, spaces, or non-alphanumeric characters in file names. Stick to letters, numbers, hyphens, and underscores.
 
