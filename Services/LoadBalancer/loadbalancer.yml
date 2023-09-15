@@ -3,6 +3,9 @@ Description: >
   This AWS CloudFormation Template creates Route 53 DNS records, an Elastic Load Balancer,
   and associated security groups. It sets up DNS records for an ALB and configures the ALB
   with a security group and HTTPS listener.
+  - Change <Name> To the desired name
+  - Change <HostedZoneID> To the desired Hosted Zone ID
+
 
 Resources:
   DNSRecord:

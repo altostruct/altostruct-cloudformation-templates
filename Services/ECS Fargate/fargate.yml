@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
   This AWS CloudFormation Template creates an Amazon ECS cluster and exports its information.
+  - Change <Name> To the desired Fargate cluster name
 
 Resources:
   Cluster:

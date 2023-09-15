@@ -3,7 +3,10 @@ Description: >
   and its associated configurations. It deploys a Lambda function inside a VPC with the
   specified security group and subnet settings, allowing it to interact with resources in
   a secure network environment.
-
+  - Change <Name> To the desired name
+  - VpcId: !ImportValue Network:ApplicationVPC imports the values from the file "/VPC/network.yml"
+  - It Gives full access to lambda, s3, gives permission to AWSLambdaVPCAccessExecutionRole, and SecretsManagerReadWrite
+  
 Resources:
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup

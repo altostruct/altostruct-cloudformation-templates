@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: >
   This AWS CloudFormation Template creates an AWS Lambda function, its associated resources, and event source mappings. 
   It sets up security groups, roles, and policies, as well as an Amazon SQS queue for event processing.
+  - Change <Name> To the desired name
+
 
 Resources:
   LambdaSecurityGroup:

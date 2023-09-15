@@ -1,3 +1,5 @@
+Description: IAM role for ECS tasks in a Fargate cluster. Grants permissions for auto-scaling and monitoring. 
+     
 Resources:
   FargateAutoScalingRole:
     Type: AWS::IAM::Role

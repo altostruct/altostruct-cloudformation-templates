@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: >
   This AWS CloudFormation Template creates an Amazon SQS dead-letter queue (DLQ) and an
   Amazon SNS topic associated with the DLQ.
+  - Change <Name> To the desired name
+
 
 Resources:
   DeadLetterQueue:

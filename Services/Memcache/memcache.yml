@@ -1,3 +1,12 @@
+Description: >
+  This CloudFormation template defines resources for configuring an AWS ElastiCache Redis cluster. 
+  It includes a security group for the cluster, a subnet group, and a replication group. 
+  The security group named "MemCache" is set up to allow incoming traffic on port 6379 for a specific IP range. 
+  The subnet group, named "DefaultApplication," specifies the subnets where the cluster will be deployed. 
+  The replication group, named "Application replication group," describes the Redis cluster's properties, such as node type, maintenance window, and snapshot settings.
+  
+  - VpcId: !ImportValue Network:ApplicationVPC imports the values from the file "/VPC/network.yml"
+
 
 Resources:
   SecurityGroup:
