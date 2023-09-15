@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  This AWS CloudFormation Template creates an Amazon ECS cluster and exports its information.
+
+Resources:
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: <Name>
+
+Outputs:
+  Cluster:
+    Description: The ID of the cluster created
+    Value: !Ref Cluster
+    Export:
+      Name: !Join [":", [!Ref "AWS::StackName", Cluster]]
+
+  ClusterName:
+    Description: The name of the cluster created
+    Value: <Name>
+    Export:
+      Name: !Join [":", [!Ref "AWS::StackName", ClusterName]]

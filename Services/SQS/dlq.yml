@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  This AWS CloudFormation Template creates an Amazon SQS dead-letter queue (DLQ) and an
+  Amazon SNS topic associated with the DLQ.
+
+Resources:
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: <Name>
+
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: <Name>
+
+Outputs:
+  DeadLetterQueue:
+    Description: DLQ ARN
+    Value: !GetAtt DeadLetterQueue.Arn
+    Export:
+      Name: !Join [":", [!Ref "AWS::StackName", DeadLetterQueue]]

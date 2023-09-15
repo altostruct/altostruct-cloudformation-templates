@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  This AWS CloudFormation Template creates an AWS Lambda function, its associated resources, and event source mappings. 
+  It sets up security groups, roles, and policies, as well as an Amazon SQS queue for event processing.
+
+Resources:
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Lambda function
+      VpcId: !ImportValue Network:ApplicationVPC
+    # Description: This resource defines the security group that will be associated with the Lambda function. It is associated with a VPC specified by an exported value.
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        - PolicyName: allowLambdaLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - logs:*
+              Resource: arn:aws:logs:*:*:*
+        - PolicyName: allowSqs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - sqs:ReceiveMessage
+              - sqs:DeleteMessage
+              - sqs:GetQueueAttributes
+              - sqs:ChangeMessageVisibility
+              Resource: !GetAtt MyQueue.Arn
+
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: <Name>
+      Role: 
+        !GetAtt LambdaFunctionRole.Arn
+      MemorySize: 1024
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !ImportValue Network:ApplicationPrivateSubnet1
+          - !ImportValue Network:ApplicationPrivateSubnet2
+          - !ImportValue Network:ApplicationPrivateSubnet3
+      PackageType: "Image"
+      Timeout: 900
+      Code:
+        ImageUri: !Sub ${AWS::AccountId}.dkr.ecr.eu-central-1.amazonaws.com/retrainindividualmodel:latest
+
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambda_FullAccess
+        - arn:aws:iam::aws:policy/AmazonSQSFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Path: "/"
+      Policies:
+      - PolicyName: AppendToLogsPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - ecr:*
+            - ecr-public:*
+            - ecr:InitiateLayerUpload 
+            Resource: "*"
+      - PolicyName: allowVpcIntegration
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ec2:DescribeNetworkInterfaces
+                - ec2:CreateNetworkInterface
+                - ec2:DeleteNetworkInterface
+                - ec2:DescribeInstances
+                - ec2:AttachNetworkInterface
+              Resource: "*"
+
+  LambdaFunctionEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 10
+      Enabled: true
+      EventSourceArn: !GetAtt MyQueue.Arn
+      FunctionName: !GetAtt LambdaFunction.Arn
+
+  MyQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: RetrainQueue
+      DelaySeconds: 0
+      VisibilityTimeout: 120
+      RedrivePolicy:
+        deadLetterTargetArn: !ImportValue dlq:DeadLetterQueue
+        maxReceiveCount: 5

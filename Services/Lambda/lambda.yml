@@ -1,0 +1,78 @@
+Description: >
+  This AWS CloudFormation Template creates the necessary AWS resources for a Lambda function
+  and its associated configurations. It deploys a Lambda function inside a VPC with the
+  specified security group and subnet settings, allowing it to interact with resources in
+  a secure network environment.
+
+Resources:
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Lambda function
+      VpcId: !ImportValue Network:ApplicationVPC
+    # Description: This resource defines the security group that will be associated with the Lambda function. It is associated with a VPC specified by an exported value.
+
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: <Name>
+      Role: !GetAtt Role.Arn
+      MemorySize: 1024
+      Timeout: 900
+      PackageType: "Image"
+      Code:
+        ImageUri: !Sub ${AWS::AccountId}.dkr.ecr.eu-central-1.amazonaws.com/empty-http-api:latest
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !ImportValue Network:ApplicationPrivateSubnet1
+          - !ImportValue Network:ApplicationPrivateSubnet2
+          - !ImportValue Network:ApplicationPrivateSubnet3
+    # Description: This resource defines the AWS Lambda function. It is associated with a role, configured with memory and timeout settings, and deployed as a container image.
+
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambda_FullAccess
+        - arn:aws:iam::aws:policy/AmazonSQSFullAccess
+      Path: "/"
+      Policies:
+        - PolicyName: AppendToLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - ecr:*
+                  - ecr-public:*
+                  - ecr:InitiateLayerUpload 
+                Resource: "*"
+        - PolicyName: allowVpcIntegration
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DescribeInstances
+                  - ec2:AttachNetworkInterface
+                Resource: "*"
+    # Description: This resource defines the IAM role associated with the Lambda function. It grants permissions for Lambda to interact with various AWS services and resources.

@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  This AWS CloudFormation Template creates Route 53 DNS records, an Elastic Load Balancer,
+  and associated security groups. It sets up DNS records for an ALB and configures the ALB
+  with a security group and HTTPS listener.
+
+Resources:
+  DNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      # TODO REFACTOR TO BE DYNAMIC
+      HostedZoneId: <HostedZoneID>
+      Comment: DNS name for the load balancer for ALB
+      Name: api.example.com
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt LoadBalancer.DNSName
+        HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
+
+  DNS2Record:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      # TODO REFACTOR TO BE DYNAMIC
+      HostedZoneId: <HostedZoneID>
+      Comment: DNS name for the load balancer for ALB
+      Name: example.com
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt LoadBalancer.DNSName
+        HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: LoadBalancer
+      GroupDescription: Allow traffic to load balancer
+      VpcId: !ImportValue Network:ApplicationVPC
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.0.0/16
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 10.0.0.0/16
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: ApplicationLoadBalancer
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Subnets:
+        - !ImportValue Network:ApplicationPublicSubnet1
+        - !ImportValue Network:ApplicationPublicSubnet2
+        - !ImportValue Network:ApplicationPublicSubnet3
+      Type: application
+      LoadBalancerAttributes:
+           - Key: idle_timeout.timeout_seconds
+             Value: 4000
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            ContentType: "text/plain"
+            MessageBody: "No service found..."
+            StatusCode: "404"
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Sub arn:aws:acm:eu-central-1:${AWS::AccountId}:certificate/dbc2f62a-e3da-4065-8f08-2e10cd2c18fd
+
+Outputs:
+  Loadbalancer:
+    Description: The id of the load balancer
+    Value: !Ref LoadBalancer
+    Export:
+      Name: !Join [":", [!Ref "AWS::StackName", LoadBalancer]]
+
+  Listener:
+    Description: The id of the HTTPS listener
+    Value: !Ref Listener
+    Export:
+      Name: !Join [":", [!Ref "AWS::StackName", Listener]]
