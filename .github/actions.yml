@@ -1,8 +1,9 @@
 name: run script.py
 
 on:
-  issue_comment:
-    types: [created, deleted]
+  push:
+    branches:
+      - "*"
 
 jobs:
   build:
