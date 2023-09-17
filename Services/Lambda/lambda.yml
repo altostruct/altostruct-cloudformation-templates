@@ -6,7 +6,7 @@ Description: >
   - Change <Name> To the desired name
   - VpcId: !ImportValue Network:ApplicationVPC imports the values from the file "/VPC/network.yml"
   - It Gives full access to lambda, s3, gives permission to AWSLambdaVPCAccessExecutionRole, and SecretsManagerReadWrite
-  
+
 Resources:
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
