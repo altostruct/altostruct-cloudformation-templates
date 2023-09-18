@@ -27,7 +27,7 @@ jobs:
 
     - name: Configure AWS CLI
       env:
-        AWS_DEFAULT_REGION: us-north-1  # Set your AWS region
+        AWS_DEFAULT_REGION: eu-north-1  # Set your AWS region
       run: |
         echo "Setting up AWS CLI..."
         aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
