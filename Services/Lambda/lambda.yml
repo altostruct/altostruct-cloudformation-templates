@@ -13,7 +13,7 @@ Resources:
     Properties:
       GroupDescription: Security group for Lambda function
       VpcId: !ImportValue Network:ApplicationVPC
-    # Description: This resource defines the security group that will be associated with the Lambda function. It is associated with a VPC specified by an exported value.
+    # Description: This resource defines the security group that will be associated with the Lambda function. It is associated with a VPC specified by an exported value. test
   LambdaFunction:
     Type: 'AWS::Lambda::Function'
     Properties:
