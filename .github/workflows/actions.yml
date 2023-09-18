@@ -15,13 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: eu-west-1
-        SOURCE_DIR: "public"
-        
+  build:      
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +24,16 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+
+    - name: Configure AWS CLI
+      env:
+        AWS_DEFAULT_REGION: us-north-1  # Set your AWS region
+      run: |
+        echo "Setting up AWS CLI..."
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws configure set default.region $AWS_DEFAULT_REGION
+        aws sts get-caller-identity  # Test AWS authentication
 
     - name: Install dependencies
       run: |
