@@ -1,0 +1,5 @@
+{
+    "REGION": "eu-north-1",
+    "PROFILE": "default",
+    "S3_CODE_BUCKET": "altostruct-cloudformation-code"
+}

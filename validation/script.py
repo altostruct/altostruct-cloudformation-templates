@@ -1,5 +1,5 @@
 import os
-rootdir = 'Services'
+rootdir = 'services'
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:

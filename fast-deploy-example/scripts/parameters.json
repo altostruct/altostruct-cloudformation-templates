@@ -1,0 +1,13 @@
+[
+  {
+    "stack_name": "1-Network",
+    "template_file_name": "1-network"
+  },
+  {
+    "stack_name": "IAM",
+    "template_file_name": "IAM"
+  }
+  
+]
+
+

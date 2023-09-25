@@ -37,4 +37,4 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test templates
       run: |
-        python3 scripts/script.py
+        python3 validation/script.py

@@ -17,7 +17,7 @@ Resources:
   LambdaFunction:
     Type: 'AWS::Lambda::Function'
     Properties:
-      FunctionName: <Name>
+      FunctionName: Deploylambda
       Role: !GetAtt Role.Arn
       MemorySize: 1024
       Timeout: 900

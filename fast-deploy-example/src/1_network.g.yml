@@ -1,0 +1,445 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "This AWS CloudFormation Template creates an Amazon VPC with public and\
+  \ private subnets, Internet Gateways, NAT Gateways, and associated route tables\
+  \ for an application.\n"
+Resources:
+  ApplicationVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: Name
+        Value: VPC
+  ApplicationPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 0
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.128.0/22
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: Public Subnet (AZ1)
+  ApplicationPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 1
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.136.0/22
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: Public Subnet (AZ2)
+  ApplicationPublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 2
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.144.0/22
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: Public Subnet (AZ3)
+  ApplicationPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 0
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.64.0/22
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: Private Subnet (AZ1)
+  ApplicationPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 1
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.72.0/22
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: Private Subnet (AZ2)
+  ApplicationPrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 2
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.80.0/22
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: Private Subnet (AZ2)
+  ApplicationPrivateWithoutNATSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 0
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.32.0/22
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: Private without NAT Subnet (AZ1)
+  ApplicationPrivateWithoutNATSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 1
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.40.0/22
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: Private without NAT Subnet (AZ2)
+  ApplicationPrivateWithoutNATSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      AvailabilityZone:
+        Fn::Select:
+        - 2
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.48.0/22
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: Private without NAT Subnet (AZ2)
+  ApplicationInternetGateway:
+    Type: AWS::EC2::InternetGateway
+  ApplicationInternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId:
+        Ref: ApplicationInternetGateway
+      VpcId:
+        Ref: ApplicationVPC
+  ApplicationNatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: ApplicationInternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  ApplicationNatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: ApplicationInternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  ApplicationNatGateway3EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: ApplicationInternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  ApplicationNatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - ApplicationNatGateway1EIP
+        - AllocationId
+      SubnetId:
+        Ref: ApplicationPublicSubnet1
+  ApplicationNatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - ApplicationNatGateway2EIP
+        - AllocationId
+      SubnetId:
+        Ref: ApplicationPublicSubnet2
+  ApplicationNatGateway3:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - ApplicationNatGateway3EIP
+        - AllocationId
+      SubnetId:
+        Ref: ApplicationPublicSubnet3
+  ApplicationPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      Tags:
+      - Key: Name
+        Value: Public Routes
+  ApplicationDefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: ApplicationInternetGatewayAttachment
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: ApplicationInternetGateway
+  ApplicationPublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPublicRouteTable
+      SubnetId:
+        Ref: ApplicationPublicSubnet1
+  ApplicationPublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPublicRouteTable
+      SubnetId:
+        Ref: ApplicationPublicSubnet2
+  ApplicationPublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPublicRouteTable
+      SubnetId:
+        Ref: ApplicationPublicSubnet3
+  ApplicationPrivateWithoutNATRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      Tags:
+      - Key: Name
+        Value: Private without NAT Routes (AZ1)
+  ApplicationPrivateWithoutNATRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      Tags:
+      - Key: Name
+        Value: Private without NAT Routes (AZ2)
+  ApplicationPrivateWithoutNATRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      Tags:
+      - Key: Name
+        Value: Private without NAT Routes (AZ3)
+  ApplicationPrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      Tags:
+      - Key: Name
+        Value: Private Routes (AZ1)
+  ApplicationPrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      Tags:
+      - Key: Name
+        Value: Private Routes (AZ2)
+  ApplicationPrivateRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: ApplicationVPC
+      Tags:
+      - Key: Name
+        Value: Private Routes (AZ3)
+  ApplicationDefaultPrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: ApplicationNatGateway1
+  ApplicationDefaultPrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: ApplicationNatGateway2
+  ApplicationDefaultPrivateRoute3:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateRouteTable3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: ApplicationNatGateway3
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateRouteTable1
+      SubnetId:
+        Ref: ApplicationPrivateSubnet1
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateRouteTable2
+      SubnetId:
+        Ref: ApplicationPrivateSubnet2
+  PrivateSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateRouteTable3
+      SubnetId:
+        Ref: ApplicationPrivateSubnet3
+  PrivateWithoutNATSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateWithoutNATRouteTable1
+      SubnetId:
+        Ref: ApplicationPrivateWithoutNATSubnet1
+  PrivateWithoutNATSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateWithoutNATRouteTable2
+      SubnetId:
+        Ref: ApplicationPrivateWithoutNATSubnet2
+  PrivateWithoutNATSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: ApplicationPrivateWithoutNATRouteTable3
+      SubnetId:
+        Ref: ApplicationPrivateWithoutNATSubnet3
+Outputs:
+  ApplicationVPC:
+    Description: Id for the VPC used by the application
+    Value:
+      Ref: ApplicationVPC
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationVPC
+  ApplicationPublicSubnet1:
+    Description: Id for public subnet(AZ-1) for the application
+    Value:
+      Ref: ApplicationPublicSubnet1
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPublicSubnet1
+  ApplicationPublicSubnet2:
+    Description: Id for public subnet(AZ-2) for the application
+    Value:
+      Ref: ApplicationPublicSubnet2
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPublicSubnet2
+  ApplicationPublicSubnet3:
+    Description: Id for public subnet(AZ-3) for the application
+    Value:
+      Ref: ApplicationPublicSubnet3
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPublicSubnet3
+  ApplicationPrivateWithoutNATSubnet1:
+    Description: Id for protected subnet(AZ-1) for the application
+    Value:
+      Ref: ApplicationPrivateWithoutNATSubnet1
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPrivateWithoutNATSubnet1
+  ApplicationPrivateWithoutNATSubnet2:
+    Description: Id for protected subnet(AZ-2) for the application
+    Value:
+      Ref: ApplicationPrivateWithoutNATSubnet2
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPrivateWithoutNATSubnet2
+  ApplicationPrivateWithoutNATSubnet3:
+    Description: Id for protected subnet(AZ-3) for the application
+    Value:
+      Ref: ApplicationPrivateWithoutNATSubnet3
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPrivateWithoutNATSubnet3
+  ApplicationPrivateSubnet1:
+    Description: Id for private subnet(AZ-1) for the application
+    Value:
+      Ref: ApplicationPrivateSubnet1
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPrivateSubnet1
+  ApplicationPrivateSubnet2:
+    Description: Id for private subnet(AZ-2) for the application
+    Value:
+      Ref: ApplicationPrivateSubnet2
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPrivateSubnet2
+  ApplicationPrivateSubnet3:
+    Description: Id for private subnet(AZ-3) for the application
+    Value:
+      Ref: ApplicationPrivateSubnet3
+    Export:
+      Name:
+        Fn::Join:
+        - ':'
+        - - Ref: AWS::StackName
+          - ApplicationPrivateSubnet3
