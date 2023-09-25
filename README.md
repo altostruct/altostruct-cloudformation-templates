@@ -8,7 +8,7 @@ The templates that are avaliable is in the service-valut where you can pick and 
 ## How to Use
 To use these CloudFormation templates in your project:
 1. Choose to the specific template from the service-valut directory.
-2. Add these templates to the fast-deploy-example directory in the src folder and rename it following the convenstion. Check the deploy guidelines here [HERE](/DEPLOY.md)
+2. Add these templates to the fast-deploy-example directory in the src folder and rename it following the convenstion. Check the deploy guidelines [HERE](/DEPLOY.md)
 3. deploy the script "deploy.sh" in the scripts folder under the directory scripts inside fast-deploy-example.
 
 By utilizing these templates, you can quickly and consistently provision AWS resources, saving time and ensuring infrastructure as code best practices.
