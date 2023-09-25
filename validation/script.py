@@ -1,5 +1,5 @@
 import os
-rootdir = 'services'
+rootdir = 'service-vault'
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
