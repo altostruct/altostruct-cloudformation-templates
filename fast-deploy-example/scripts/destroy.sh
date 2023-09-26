@@ -1,6 +1,10 @@
 CURRENT_DIR=$(dirname "$0")
 STACKS_FOLDER=$CURRENT_DIR/../src
 
+#Make sure to run 'brew install jq' for mac
+JSON_FILE="profile.json"
+REGION=$(jq -r ".REGION" "$JSON_FILE")
+
 # Config for bash
 set -e 
 set -o pipefail
@@ -28,12 +32,13 @@ for file_path in "$STACKS_FOLDER"/*; do
 
       
             # Deploy the file based on its numeric prefix
-            echo "Deploying the file $file_name with the name: $file_suffix"
+            echo "Deleting the stack with the name: $file_suffix"
 
             # Add your deployment logic here, e.g., using AWS CLI or other tools
-            $CURRENT_DIR/deploy-stack.sh $STACKS_FOLDER/$file_name $file_suffix
+            aws cloudformation delete-stack \
+            --stack-name $file_suffix \
+            --region $REGION
 
-            echo file_name
         else
             echo "Skipping $file_name (Invalid Numeric Prefix)"
         fi
