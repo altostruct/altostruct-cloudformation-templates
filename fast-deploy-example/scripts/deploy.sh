@@ -33,7 +33,6 @@ for file_path in "$STACKS_FOLDER"/*; do
             # Add your deployment logic here, e.g., using AWS CLI or other tools
             $CURRENT_DIR/deploy-stack.sh $STACKS_FOLDER/$file_name $file_suffix
 
-            echo file_name
         else
             echo "Skipping $file_name (Invalid Numeric Prefix)"
         fi
