@@ -1,0 +1,88 @@
+Description: |
+  This CloudFormation template creates a secure Amazon Aurora database cluster in multiple private subnets within your VPC. The cluster utilizes AWS Secrets Manager for secure credential management and features a custom security group to control inbound traffic. The Aurora cluster is configured with version 8.0, backup retention, and serverless scaling for automatic capacity adjustments based on workload.
+  - **Aurora Cluster Configuration:** The template provisions an Aurora MySQL cluster with version 8.0. The cluster is named "application-database" and includes settings for backup retention, preferred backup window, and maintenance window. It utilizes serverless scaling, allowing the cluster to automatically adjust its capacity based on the workload.
+  - **The template generates a random password for the master user and stores it securely in Secrets Manager.
+  - **Subnet Group Configuration:** The template creates a DB subnet group that spans multiple private subnets within your VPC.
+
+Parameters:
+  Name:
+    Type: String
+
+Resources:
+  SubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: CloudFormation managed DB subnet group.
+      DBSubnetGroupName: !Sub "${Name}-subnet-group"
+      SubnetIds:
+        - !ImportValue Network:ApplicationPrivateSubnet1
+        - !ImportValue Network:ApplicationPrivateSubnet2
+        - !ImportValue Network:ApplicationPrivateSubnet3
+
+  MasterUserCredentials:
+    Type: "AWS::SecretsManager::Secret"
+    Properties:
+      Name: !Sub "/rds/${Name}/credentials"
+      Description: !Sub "Database credentials for database (${Name})"
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "<Name of DB>"}'
+        GenerateStringKey: "password"
+        PasswordLength: 30
+        ExcludeCharacters: '"@/\'
+
+  SecretRedshiftAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId:
+        Ref: MasterUserCredentials
+      TargetId:
+        Ref: Cluster
+      TargetType: AWS::RDS::DBCluster
+
+  PrimaryInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: aurora-mysql
+      DBClusterIdentifier: !Ref Cluster
+      DBInstanceClass: db.serverless
+      DBSubnetGroupName: !Ref "SubnetGroup"
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "Security group for RDS (${Name})"
+      GroupName: !Sub "${Name}-security-group"
+      SecurityGroupIngress:
+        - CidrIp: 10.0.0.0/8
+          FromPort: 3306
+          ToPort: 3306
+          IpProtocol: tcp
+      VpcId: !ImportValue Network:ApplicationVPC
+
+  Cluster:
+    Type: "AWS::RDS::DBCluster"
+    DeletionPolicy: Delete
+    Properties:
+      Engine: aurora-mysql
+      EngineVersion: "8.0"
+      DBClusterIdentifier: "application-database"
+      MasterUsername: connectel_root
+      DatabaseName: default_database
+      DBSubnetGroupName: !Ref SubnetGroup
+      PreferredBackupWindow: 01:00-02:00
+      BackupRetentionPeriod: 7
+      PreferredMaintenanceWindow: mon:03:00-mon:04:00
+      VpcSecurityGroupIds:
+        - !Ref SecurityGroup
+      MasterUserPassword:
+        Fn::Sub: "{{resolve:secretsmanager:${MasterUserCredentials}::password}}"
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 0.5
+        MaxCapacity: 3
+
+Outputs:
+  SecurityGroup:
+    Description: SG for new RDS
+    Value: !Ref SecurityGroup
+    Export:
+      Name: !Join [":", [!Ref "AWS::StackName", SecurityGroup]]

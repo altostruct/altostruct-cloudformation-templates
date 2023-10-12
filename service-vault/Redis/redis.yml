@@ -1,0 +1,45 @@
+Description: |
+  This CloudFormation template creates a highly available and secure Amazon ElastiCache Redis cluster. The template provisions a custom security group named "MemCache" to control inbound traffic, allowing access on port 6379 from the specified IP range. A subnet group, "DefaultApplication," is established across private subnets within your VPC, ensuring network isolation.
+  The ElastiCache Redis replication group, configured for high availability, consists of two cache clusters. Automatic failover is enabled, and the cluster utilizes cache.t2.micro instances. The replication group operates on port 6379 and implements a snapshot retention policy of 7 days. Maintenance activities are scheduled between 22:00 and 23:30 UTC on Sundays.
+
+
+Resources:
+  SecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: Security group for Redis cluster
+      GroupName: MemCache
+      SecurityGroupIngress:
+        - CidrIp: 10.0.0.0/8
+          FromPort: 6379
+          ToPort: 6379
+          IpProtocol: tcp
+      VpcId: !ImportValue Network:ApplicationVPC
+
+  SubnetGroup:
+    Type: "AWS::ElastiCache::SubnetGroup"
+    Properties:
+      Description: Default Subnet Group for the application
+      CacheSubnetGroupName: DefaultApplication
+      SubnetIds:
+        - !ImportValue Network:ApplicationPrivateWithoutNATSubnet1
+        - !ImportValue Network:ApplicationPrivateWithoutNATSubnet2
+        - !ImportValue Network:ApplicationPrivateWithoutNATSubnet3
+
+  ReplicationGroup:
+    Type: "AWS::ElastiCache::ReplicationGroup"
+    Properties:
+      AutomaticFailoverEnabled: true
+      CacheNodeType: cache.t2.micro
+      CacheSubnetGroupName: !Ref SubnetGroup
+      Engine: redis
+      NumCacheClusters: 2
+      Port: 6379
+      PreferredMaintenanceWindow: sun:22:00-sun:23:30
+      ReplicationGroupDescription: Application replication group
+      SecurityGroupIds:
+        - !GetAtt
+          - SecurityGroup
+          - GroupId
+      SnapshotRetentionLimit: 7
+      SnapshotWindow: "05:00-09:00"

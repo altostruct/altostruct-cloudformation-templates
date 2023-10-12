@@ -1,0 +1,27 @@
+Description: |
+  This CloudFormation template creates a highly secure Amazon S3 bucket with stringent access controls and encryption settings. The key features of this template include enabling versioning to track changes, implementing server-side encryption using the AES256 algorithm to safeguard data at rest, and configuring strict public access blocks to prevent unauthorized access. The bucket's access control is set to private, ensuring that only authenticated and authorized users or applications can access the stored data. The template dynamically references the CloudFormation stack name using the AWS::StackName intrinsic function, enhancing adaptability across different stacks. Additionally, the template exports the created bucket reference, enabling seamless integration with other AWS resources and services within the same account.
+  
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: bucket-name
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption: 
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:
+  S3Bucket:
+    Description: Bucket Created using this template.
+    Value: !Ref S3Bucket
+    Export:
+      Name: !Join [":", [!Ref "AWS::StackName", S3Bucket]]

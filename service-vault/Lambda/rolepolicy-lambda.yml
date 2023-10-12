@@ -1,0 +1,43 @@
+Description: |
+  The role is designed to be assumed by AWS Lambda functions, allowing them to perform specific actions within your AWS environment.
+
+  This CloudFormation template defines an AWS Identity and Access Management (IAM) role named "<Role name>" (Make sure to change it to the desired name). 
+  The "<Role name>" role includes the following managed policies:
+  - `AmazonECSTaskExecutionRolePolicy`: Provides necessary permissions for Amazon ECS task execution.
+  - `CloudWatchLogsFullAccess`: Grants full access to Amazon CloudWatch Logs for logging capabilities.
+  - `AmazonSSMReadOnlyAccess`: Allows read-only access to AWS Systems Manager (SSM) for secure parameter management.
+  - `AmazonEC2FullAccess`: Provides full access to Amazon EC2 resources for managing instances and networks.
+
+  -All of these policies can be changed according to your enviroment
+  
+
+Resources:
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "<Rolename here>"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        - "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+      Policies:
+        - PolicyName: allowVpcIntegration
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Resource: "*"
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DescribeInstances
+                  - ec2:AttachNetworkInterface
+
